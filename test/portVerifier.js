@@ -97,7 +97,7 @@ test("changed and duplicated owned seams fail closed", () => {
   assert.strictEqual(duplicated.source, duplicatedSpaceSource);
 });
 
-test("launched-drone prime merges Solo attr77 into the complete upstream map", () => {
+test("launched-drone prime and cache refresh scale the fresh complete upstream map", () => {
   const runtime = readTransformTarget("droneRuntime");
   const transformed = transforms.transformSource(runtime.filename, runtime.source);
   assert.strictEqual(transformed.ok, true, transformed.reason);
@@ -107,8 +107,11 @@ test("launched-drone prime merges Solo attr77 into the complete upstream map", (
   const scope = transformed.source.slice(start, end);
   assert.match(
     scope,
-    /attributeOverrides: globalThis\[Symbol\.for\("evejs\.soloProgressionBalance"\)\]\?\.mergeMiningDroneClientAttributeOverrides\(attributeOverrides, entity\.passiveDerivedState && entity\.passiveDerivedState\.attributes\) \|\| attributeOverrides \|\| \{\}/u,
+    /const upstreamAttributeOverrides = resolveDroneTooltipAttributes\([\s\S]*?const attributeOverrides = globalThis\[Symbol\.for\("evejs\.soloProgressionBalance"\)\]\?\.scaleDroneOperationalAttributes\(upstreamAttributeOverrides, \{ session: targetSessions\[0\], ownerID: shipRecord\.ownerID \}\) \|\| upstreamAttributeOverrides/u,
   );
+  assert.match(scope, /attributeOverrides: attributeOverrides \|\| \{\}/u);
+  assert.match(scope, /buildDroneTooltipAttributeStamp\(attributeOverrides\)/u);
+  assert.doesNotMatch(scope, /entity\.passiveDerivedState/u);
   assert.doesNotMatch(
     scope,
     /includeTypeAttributes: true[^\r\n]*attributeOverrides:/u,
@@ -118,8 +121,8 @@ test("launched-drone prime merges Solo attr77 into the complete upstream map", (
   const vanillaEnd = runtime.source.indexOf("\nfunction ", vanillaStart + 1);
   const vanillaScope = runtime.source.slice(vanillaStart, vanillaEnd);
   const incompleteScope = vanillaScope.replace(
-    "    attributeOverrides: attributeOverrides || {},",
-    "    attributeOverrides: {},",
+    "  const attributeOverrides = resolveDroneTooltipAttributes(",
+    "  const attributeOverrides = resolveOtherAttributes(",
   );
   assert.notStrictEqual(incompleteScope, vanillaScope);
   const incompletePremise =
@@ -130,6 +133,16 @@ test("launched-drone prime merges Solo attr77 into the complete upstream map", (
   assert.strictEqual(rejected.ok, false);
   assert.match(rejected.reason, /required seam missing or changed/u);
   assert.strictEqual(rejected.source, incompletePremise);
+
+  const refreshStart = transformed.source.indexOf("function handleControllerDogmaCacheRebuilt(");
+  const refreshEnd = transformed.source.indexOf("\nfunction ", refreshStart + 1);
+  const refreshScope = transformed.source.slice(refreshStart, refreshEnd);
+  assert.match(
+    refreshScope,
+    /const upstreamAttributes = resolveDroneTooltipAttributes\([\s\S]*?const attributes = globalThis\[Symbol\.for\("evejs\.soloProgressionBalance"\)\]\?\.scaleDroneOperationalAttributes\(upstreamAttributes, controllerEntity\) \|\| upstreamAttributes/u,
+  );
+  assert.match(refreshScope, /buildDroneTooltipAttributeStamp\(attributes\)/u);
+  assert.doesNotMatch(refreshScope, /droneEntity\.passiveDerivedState/u);
 });
 
 test("fitting overlay preserves upstream mode inputs and active contexts", () => {

@@ -436,7 +436,7 @@ test("Fitting snapshot overlay preserves the accepted server-side fitted attr77 
   assert.deepStrictEqual(snapshot.getModuleAttributeOverrides({ itemID: 7001, flagID: 27 }), { 30: 10, 50: 20, 77: 300 });
 });
 
-test("DogmaService V4 overlay makes real ItemGetInfo authoritative", () => {
+test("DogmaService ItemGetInfo prefers refreshed operational amount over stale passive state", () => {
   const api = makeApi();
   const context = liveDroneContext();
   class FakeDogmaService {
@@ -451,9 +451,13 @@ test("DogmaService V4 overlay makes real ItemGetInfo authoritative", () => {
   };
   overlays.installDogmaService(FakeDogmaService, api, candidateRoot, {
     spaceRuntime: { getSceneForSession: () => scene },
+    droneDogma: {
+      resolveDroneOperationalAttributes: () => ({ 73: 60000, 77: 306 }),
+    },
   });
   const result = new FakeDogmaService()._buildInventoryItemAttributes(context.item, {});
-  assert.strictEqual(result[77], 204);
+  assert.strictEqual(context.runtimeEntity.passiveDerivedState.attributes[77], 204);
+  assert.strictEqual(result[77], 306);
   assert.strictEqual(result[73], 60000);
 });
 
