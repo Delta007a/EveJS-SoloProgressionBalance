@@ -12,6 +12,6 @@ The Launcher writes `mods/soloProgressionBalance/settings.json` and carries it f
 
 The loader owns narrow in-memory source seams and export overlays. It composes with DroneClassBalance and the other two mods. Disabling both the Launcher switch and the Solo `enabled` setting, then restarting, removes its scaling. Launcher Remove removes package-local settings; back up `settings.json` first if needed.
 
-Final 0.12.9 certification: 44/44 targeted tests, a focused already-launched Mining Drone refresh regression, five clean-final port checks and four-loader composition passed. On a controller-state change, the client prime scales the newly resolved mining amount and retains upstream duration and related attributes. Final live gameplay remains to be checked.
+Final 0.12.9 certification: 44/44 targeted tests, a focused already-launched Mining Drone refresh regression, five clean-final port checks and four-loader composition passed. On a controller-state change, the client prime scales the newly resolved mining amount and retains upstream duration and related attributes. Real final client gameplay confirmed an already-launched Porpoise Mining Drone I changing live from 255 to 306 m³ on Industrial Core activation, and an Ice Harvesting Drone retaining 3000 m³ while its cycle changed from 164.0 to 134.5 seconds.
 
 License: AGPL-3.0-only. EveJS itself is AGPL-3.0-only; no vendor source is included in this package.
