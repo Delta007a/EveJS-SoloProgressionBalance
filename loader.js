@@ -5,7 +5,7 @@ const Module = require("node:module");
 const path = require("node:path");
 const { isMainThread } = require("node:worker_threads");
 
-const MOD_VERSION = "0.4.0";
+const MOD_VERSION = "0.4.1";
 const MOD_DIR = __dirname;
 const RUNTIME_ROOT = path.resolve(MOD_DIR, "../..");
 const LOG_PREFIX = "[soloProgressionBalance]";
@@ -276,3 +276,14 @@ module.exports = {
   installResult,
   _testing: Object.freeze({ buildCanonicalTargetMap, findPrecachedTargets, installModuleHook }),
 };
+
+// Simulation is optional and cannot unwind the already-installed gameplay hooks.
+try {
+  module.exports.simulation = require("./simulation").install(
+    installResult, globalThis[Symbol.for(API_SYMBOL)], RUNTIME_ROOT, MOD_DIR,
+  );
+  if (!module.exports.simulation.active) log(`simulation unavailable: ${module.exports.simulation.reason}; gameplay unchanged`);
+} catch (error) {
+  logError("optional simulation unavailable; gameplay unchanged", error);
+  module.exports.simulation = { active: false, reason: "optional-preflight-failed" };
+}
