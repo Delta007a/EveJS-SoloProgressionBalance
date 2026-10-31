@@ -30,7 +30,7 @@ function capacityProgram(api, metadata) {
   return program;
 }
 
-function buildSoloPolicy(state, api, catalog, isMiningModuleItem) {
+function buildSoloPolicy(state, api, catalog, isMiningModuleItem, evejsVersion = "0.12.9") {
   if (!state?.active || !api?.config?.enabled) return null;
   const programs = [], ships = {}, indexes = new Map(), modules = [], drones = [];
   for (const metadata of [...catalog].sort((a, b) => a.typeID - b.typeID)) {
@@ -52,7 +52,7 @@ function buildSoloPolicy(state, api, catalog, isMiningModuleItem) {
   const provider = { schema: 1, capacityPrograms: programs, ships, miningAttribute: ATTRIBUTE_MINING_AMOUNT,
     moduleTypes: moduleScale === 1 ? [] : modules, moduleScale,
     droneTypes: droneScale === 1 ? [] : drones, droneScale };
-  const policy = { schema: 1, evejs: "0.12.9", clientBuild: 3396210,
+  const policy = { schema: 1, evejs: evejsVersion, clientBuild: 3396210,
     providers: { soloprogressionbalance: provider } };
   policy.revision = crypto.createHash("sha256").update(JSON.stringify(policy)).digest("hex");
   return policy;

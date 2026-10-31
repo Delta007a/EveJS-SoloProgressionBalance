@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "miningYieldScale": 3,
+  "miningDroneYieldScale": 3,
+  "miningHoldScale": 3,
+  "logisticsCargoScale": 2,
+  "verbose": false
+}

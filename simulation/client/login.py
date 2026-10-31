@@ -23,7 +23,7 @@ try:
 
         def __init__(self):
             self.abi = 1
-            self.bundle_revision = 2
+            self.bundle_revision = 4
             self.active = True
             self.controller = None
             self.registered = []

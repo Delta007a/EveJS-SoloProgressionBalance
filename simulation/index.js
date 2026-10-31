@@ -1,7 +1,7 @@
 "use strict";
 const path = require("node:path");
 const { attachMember } = require("./familyRuntime");
-const { readBundle } = require("./delivery");
+const { readBundle, getRuntimeVersion } = require("./delivery");
 const { buildSoloPolicy } = require("./policy");
 const { permitted } = require("./capability");
 function install(gameplayState, api, runtimeRoot, modRoot) {
@@ -13,7 +13,7 @@ function install(gameplayState, api, runtimeRoot, modRoot) {
       if (policy === undefined) {
         const { listItemTypes } = require(path.join(runtimeRoot, "server/src/services/inventory/itemTypeRegistry"));
         const { isMiningModuleItem } = require(path.join(runtimeRoot, "server/src/space/runtime/moduleHeat"));
-        policy = buildSoloPolicy(gameplayState, api, listItemTypes(), isMiningModuleItem);
+        policy = buildSoloPolicy(gameplayState, api, listItemTypes(), isMiningModuleItem, getRuntimeVersion(runtimeRoot));
         console.log(`[soloProgressionBalance/simulation] policy ${policy?.revision || "unavailable"}`);
       }
       return policy;
