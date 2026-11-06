@@ -2,7 +2,7 @@
   "schemaVersion": 3,
   "id": "soloprogressionbalance",
   "displayName": "SoloProgressionBalance",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "description": "Solo mining, drone, hold and logistics scaling with optional automatic fitting simulation.",
   "kind": "loader",
   "supportedBackends": [
