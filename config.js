@@ -4,7 +4,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const KEYS = Object.freeze({
-  enabled: "EVEJS_SOLO_PROGRESSION_BALANCE",
   miningYieldScale: "EVEJS_SOLO_MINING_YIELD_SCALE",
   miningDroneYieldScale: "EVEJS_SOLO_MINING_DRONE_YIELD_SCALE",
   miningHoldScale: "EVEJS_SOLO_MINING_HOLD_SCALE",
@@ -12,7 +11,7 @@ const KEYS = Object.freeze({
   verbose: "EVEJS_SOLO_PROGRESSION_BALANCE_VERBOSE",
 });
 const DEFAULTS = Object.freeze({
-  enabled: false, miningYieldScale: 3, miningDroneYieldScale: 3,
+  miningYieldScale: 3, miningDroneYieldScale: 3,
   miningHoldScale: 3, logisticsCargoScale: 2, verbose: false,
 });
 
@@ -46,7 +45,13 @@ function readSettings(modDir) {
   if (!fs.existsSync(file)) return {};
   const value = JSON.parse(fs.readFileSync(file, "utf8"));
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Solo settings.json must contain an object");
-  for (const key of Object.keys(value)) if (!Object.prototype.hasOwnProperty.call(DEFAULTS, key)) throw new Error(`Unknown Solo setting: ${key}`);
+  for (const key of Object.keys(value)) {
+    if (key !== "enabled" && !Object.prototype.hasOwnProperty.call(DEFAULTS, key)) {
+      throw new Error(`Unknown Solo setting: ${key}`);
+    }
+  }
+  // Ignore the legacy second toggle without changing the user-owned file.
+  delete value.enabled;
   return value;
 }
 
@@ -71,7 +76,6 @@ function load(modDir, environment = process.env) {
     return numeric;
   };
   return Object.freeze({
-    enabled: readBoolean(pick("enabled"), DEFAULTS.enabled),
     miningYieldScale: readScale("miningYieldScale"),
     miningDroneYieldScale: readScale("miningDroneYieldScale"),
     miningHoldScale: readScale("miningHoldScale"),

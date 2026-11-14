@@ -31,7 +31,7 @@ function capacityProgram(api, metadata) {
 }
 
 function buildSoloPolicy(state, api, catalog, isMiningModuleItem, evejsVersion = "0.12.9") {
-  if (!state?.active || !api?.config?.enabled) return null;
+  if (!state?.active || !api) return null;
   const programs = [], ships = {}, indexes = new Map(), modules = [], drones = [];
   for (const metadata of [...catalog].sort((a, b) => a.typeID - b.typeID)) {
     const typeID = Number(metadata.typeID), category = Number(metadata.categoryID);

@@ -1,4 +1,6 @@
-# SoloProgressionBalance 0.4.6
+# SoloProgressionBalance 0.4.6 (development changes)
+
+> The single-switch activation change in `main` is **not** yet included in the published v0.4.6 install ZIP. A new release is required for Launcher users.
 
 EveJS 261108.1 support updates the optional login payload and keeps the native numeric Placebo signature. Scaling continues to apply to effective native values.
 
@@ -12,7 +14,7 @@ The maintainer confirmed the four updated mods work together in-game on EveJS 26
 
 ## Install and update
 
-Download `EveJS-SoloProgressionBalance-0.4.6.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP**, enable the mod and open **Configure**. Release ZIPs contain `loader.js.disabled` and start disabled. Configuration changes require a Game server restart; transient client features require a fresh client connection.
+Download `EveJS-SoloProgressionBalance-0.4.6.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP** and enable the mod. Use **Configure** only to adjust the four multipliers and logging; there is no second enable switch. Release ZIPs contain `loader.js.disabled` and start disabled. Configuration changes require a Game server restart; transient client features require a fresh client connection.
 
 The package contains no personal `settings.json`, `.env`, runtime database or client archive. Launcher carries forward package-local files declared by the settings schema. Back up personal configuration before updating or removing a mod. For legacy customized source installations, transfer settings to the documented JSON configuration before updating; source files are replaced by updates.
 
@@ -22,14 +24,13 @@ Scales fresh effective native mining-module yield, mining-drone yield, specializ
 
 | Setting | Default |
 | --- | --- |
-| Enable Solo scaling | false |
 | Mining module yield | 3x |
 | Mining drone yield | 3x |
 | Mining holds | 3x |
 | Logistics/support cargo | 2x |
 | Verbose logging | false |
 
-Scaling stays off until enabled in Configure. `1` keeps native scaling for a category. Values must be finite and positive. Precedence: nonempty process environment, `mods/soloProgressionBalance/settings.json`, legacy `.env`, built-in defaults. `settings.example.json` and `.env.example` contain defaults, not user settings.
+Scaling activates as soon as the mod's loader is enabled in Launcher (after the Game server restart). Old `enabled` entries in `settings.json`, `.env` or `EVEJS_SOLO_PROGRESSION_BALANCE` are ignored, so an old `false` cannot silently disable the mod. The files are not rewritten. `1` keeps native scaling for a category. Values must be finite and positive. Precedence: nonempty process environment, `mods/soloProgressionBalance/settings.json`, legacy `.env`, built-in defaults. `settings.example.json` and `.env.example` contain defaults, not user settings.
 
 ## Embedded fitting simulation
 
