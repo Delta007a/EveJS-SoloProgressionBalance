@@ -205,10 +205,6 @@ function install(options = {}) {
   const runtimeRoot = path.resolve(options.runtimeRoot || RUNTIME_ROOT);
   const environment = options.environment || process.env;
   const config = require("./config").load(MOD_DIR, environment);
-  if (!config.enabled) {
-    log("inert — mod disabled; vanilla EveJS behavior retained");
-    return { active: false, reason: "disabled", config };
-  }
   if (config.problems.length > 0) {
     for (const problem of config.problems) logError(problem);
     logError("invalid mod-owned configuration — no hooks installed");

@@ -80,13 +80,15 @@ const { createRuntimeApi } = require(path.join(modDir, "lib/runtimeApi"));
 const overlays = require(path.join(modDir, "lib/overlays"));
 const transforms = require(path.join(modDir, "lib/sourceTransforms"));
 const viability = require(path.join(modDir, "lib/viability"));
-const previousEnabledValue = process.env.EVEJS_SOLO_PROGRESSION_BALANCE;
-process.env.EVEJS_SOLO_PROGRESSION_BALANCE = "0";
+// Import the loader without installing hooks into this test runner. An invalid
+// temporary multiplier only affects this process; activation is tested in children.
+const previousProbeScale = process.env.EVEJS_SOLO_MINING_YIELD_SCALE;
+process.env.EVEJS_SOLO_MINING_YIELD_SCALE = "0";
 const loaderModule = require(loaderPath);
-if (previousEnabledValue === undefined) {
-  delete process.env.EVEJS_SOLO_PROGRESSION_BALANCE;
+if (previousProbeScale === undefined) {
+  delete process.env.EVEJS_SOLO_MINING_YIELD_SCALE;
 } else {
-  process.env.EVEJS_SOLO_PROGRESSION_BALANCE = previousEnabledValue;
+  process.env.EVEJS_SOLO_MINING_YIELD_SCALE = previousProbeScale;
 }
 
 const GENERIC_SPECIAL_HOLD_IDS = [
@@ -105,7 +107,6 @@ const SPECIAL_HOLD_DEFINITIONS = [
 
 function makeConfig(overrides = {}) {
   return Object.freeze({
-    enabled: true,
     miningYieldScale: 3,
     miningDroneYieldScale: 3,
     miningHoldScale: 3,
@@ -124,7 +125,7 @@ function makeApi(overrides = {}) {
 
 test("mod owns all four scales and has no schema overlay", () => {
   const loaded = configModule.load(modDir, {});
-  assert.strictEqual(loaded.enabled, true);
+  assert.strictEqual(Object.hasOwn(loaded, "enabled"), false);
   assert.deepStrictEqual(
     [loaded.miningYieldScale, loaded.miningDroneYieldScale, loaded.miningHoldScale, loaded.logisticsCargoScale],
     [3, 3, 3, 2],
@@ -145,19 +146,38 @@ test("vendor config and schema contain none of the four private balance keys", (
   assert.doesNotMatch(gameplaySchema, /logisticsCargoScale/u);
 });
 
-test("missing mod .env defaults to disabled with the accepted scale defaults", () => {
+test("missing mod .env uses accepted scales without a secondary enable flag", () => {
   const loaded = configModule.load(path.join(modDir, "does-not-exist"), {});
-  assert.strictEqual(loaded.enabled, false);
+  assert.strictEqual(Object.hasOwn(loaded, "enabled"), false);
   assert.deepStrictEqual(
     [loaded.miningYieldScale, loaded.miningDroneYieldScale, loaded.miningHoldScale, loaded.logisticsCargoScale],
     [3, 3, 3, 2],
   );
 });
 
+
+test("legacy JSON and environment enable flags cannot disable scaling", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "solo-legacy-settings-"));
+  try {
+    fs.writeFileSync(path.join(root, "settings.json"), JSON.stringify({
+      enabled: false, miningHoldScale: 4,
+    }));
+    fs.writeFileSync(path.join(root, ".env"),
+      "EVEJS_SOLO_PROGRESSION_BALANCE=0\nEVEJS_SOLO_LOGISTICS_CARGO_SCALE=5\n");
+    const loaded = configModule.load(root, { EVEJS_SOLO_PROGRESSION_BALANCE: "0" });
+    assert.strictEqual(Object.hasOwn(loaded, "enabled"), false);
+    assert.strictEqual(loaded.miningHoldScale, 4);
+    assert.strictEqual(loaded.logisticsCargoScale, 5);
+    assert.deepStrictEqual(loaded.problems, []);
+    assert.strictEqual(JSON.parse(fs.readFileSync(path.join(root, "settings.json"), "utf8")).enabled, false);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("real environment overrides mod .env and supports explicit vanilla x1", () => {
   const keys = configModule.KEYS;
   const loaded = configModule.load(modDir, {
-    [keys.enabled]: "1",
     [keys.miningYieldScale]: "1",
     [keys.miningDroneYieldScale]: "1",
     [keys.miningHoldScale]: "1",
@@ -561,7 +581,7 @@ test("x1 API preserves vanilla module drone hold logistics and tooltip values", 
   assert.strictEqual(api.applyMiningModuleClientSync(90000001, true, { 77: 517 })[77], 517);
 });
 
-test("disabled loader installs no hook and exposes no runtime API", () => {
+test("legacy false flag no longer leaves enabled loader inert", () => {
   const loader = path.join(modDir, "loader.js");
   const vendorConfig = path.join(candidateRoot, "server/src/config");
   const code = `const Module=require('node:module');const before=Module._load;const l=require(${JSON.stringify(loader)});` +
@@ -571,17 +591,16 @@ test("disabled loader installs no hook and exposes no runtime API", () => {
     env: { ...process.env, EVEJS_SOLO_PROGRESSION_BALANCE: "0" },
   });
   assert.strictEqual(child.status, 0, child.stderr);
-  assert.match(child.stdout, /"active":false,"same":true,"api":false,"vendorMining":false,"vendorLogistics":false/u);
+  assert.match(child.stdout, /"active":true,"same":false,"api":true,"vendorMining":false,"vendorLogistics":false/u);
 });
 
-test("invalid enabled mod config fails closed before installing hooks", () => {
+test("invalid multiplier still prevents hook installation", () => {
   const loader = path.join(modDir, "loader.js");
   const code = `const Module=require('node:module');const before=Module._load;const l=require(${JSON.stringify(loader)});` +
     `console.log('RESULT:'+JSON.stringify({active:l.installResult.active,reason:l.installResult.reason,same:before===Module._load}));`;
   const child = runNode(["-e", code], {
     env: {
       ...process.env,
-      EVEJS_SOLO_PROGRESSION_BALANCE: "1",
       EVEJS_SOLO_MINING_YIELD_SCALE: "0",
     },
   });
@@ -605,11 +624,11 @@ test("all seven required targets reject pre-cached activation without leaking st
     `const l=require(${JSON.stringify(loaderPath)});const t=require(${JSON.stringify(path.join(modDir, "lib/sourceTransforms.js"))});` +
     `const targets=l._testing.buildCanonicalTargetMap(${JSON.stringify(candidateRoot)},t);const failures=[];` +
     `for(const target of targets.values()){Module._cache[target.filename]={exports:{}};let message='';` +
-    `try{l.install({environment:{EVEJS_SOLO_PROGRESSION_BALANCE:'1'}})}catch(e){message=e.message}` +
+    `try{l.install({environment:{}})}catch(e){message=e.message}` +
     `delete Module._cache[target.filename];failures.push({key:target.key,message,clean:Module._load===before&&!globalThis[l.INSTALL_FLAG]&&!globalThis[Symbol.for(l.API_SYMBOL)]});}` +
     `console.log('RESULT:'+JSON.stringify(failures));`;
   const child = runNode(["-e", code], {
-    env: { ...process.env, EVEJS_SOLO_PROGRESSION_BALANCE: "0" },
+    env: { ...process.env, EVEJS_SOLO_MINING_YIELD_SCALE: "0" },
   });
   assert.strictEqual(child.status, 0, child.stderr || child.stdout);
   const failures = parseChildResult(child.stdout);
@@ -622,13 +641,13 @@ test("all seven required targets reject pre-cached activation without leaking st
 
 test("failed config and viability attempts leave activation retryable", () => {
   const code = `const Module=require('node:module');const before=Module._load;const l=require(${JSON.stringify(loaderPath)});` +
-    `const invalid=l.install({environment:{EVEJS_SOLO_PROGRESSION_BALANCE:'1',EVEJS_SOLO_MINING_YIELD_SCALE:'0'}});` +
-    `const missing=l.install({runtimeRoot:${JSON.stringify(path.join(candidateRoot, "missing-runtime"))},environment:{EVEJS_SOLO_PROGRESSION_BALANCE:'1'}});` +
-    `const active=l.install({environment:{EVEJS_SOLO_PROGRESSION_BALANCE:'1'}});const hooked=Module._load;const duplicate=l.install();` +
+    `const invalid=l.install({environment:{EVEJS_SOLO_MINING_YIELD_SCALE:'0'}});` +
+    `const missing=l.install({runtimeRoot:${JSON.stringify(path.join(candidateRoot, "missing-runtime"))},environment:{}});` +
+    `const active=l.install({environment:{}});const hooked=Module._load;const duplicate=l.install();` +
     `console.log('RESULT:'+JSON.stringify({invalid:invalid.reason,missing:missing.reason,active:active.active,duplicate:duplicate.reason,` +
     `hookChanged:hooked!==before,hookStable:Module._load===hooked,api:!!globalThis[Symbol.for(l.API_SYMBOL)]}));`;
   const child = runNode(["-e", code], {
-    env: { ...process.env, EVEJS_SOLO_PROGRESSION_BALANCE: "0" },
+    env: { ...process.env, EVEJS_SOLO_MINING_YIELD_SCALE: "0" },
   });
   assert.strictEqual(child.status, 0, child.stderr || child.stdout);
   const result = parseChildResult(child.stdout);
@@ -670,10 +689,10 @@ test("loader remains inactive in worker threads", () => {
   assert.deepStrictEqual(parseChildResult(child.stdout), { active: false, reason: "worker-thread" });
 });
 
-test("Solo-only preload activates", () => {
+test("Solo-only preload activates even when legacy enable is false", () => {
   const code = `const l=require(${JSON.stringify(loaderPath)});console.log('RESULT:'+JSON.stringify({active:l.installResult.active}));`;
   const child = runNode(["-e", code], {
-    env: { ...process.env, EVEJS_SOLO_PROGRESSION_BALANCE: "1" },
+    env: { ...process.env, EVEJS_SOLO_PROGRESSION_BALANCE: "0" },
   });
   assert.strictEqual(child.status, 0, child.stderr || child.stdout);
   assert.deepStrictEqual(parseChildResult(child.stdout), { active: true });

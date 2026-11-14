@@ -32,17 +32,6 @@
     ],
     "fields": [
       {
-        "id": "enabled",
-        "label": "Enable Solo scaling",
-        "type": "boolean",
-        "default": false,
-        "restart": "game_server",
-        "file": "preferences",
-        "key": [
-          "enabled"
-        ]
-      },
-      {
         "id": "miningYieldScale",
         "label": "Mining module yield multiplier",
         "type": "number",

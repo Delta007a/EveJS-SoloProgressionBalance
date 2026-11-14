@@ -5,7 +5,7 @@ const { readBundle, getRuntimeVersion } = require("./delivery");
 const { buildSoloPolicy } = require("./policy");
 const { permitted } = require("./capability");
 function install(gameplayState, api, runtimeRoot, modRoot) {
-  if (!gameplayState?.active || !api?.config?.enabled) return { active: false, reason: "gameplay-inactive" };
+  if (!gameplayState?.active || !api) return { active: false, reason: "gameplay-inactive" };
   const bundle = readBundle(__dirname);
   let policy;
   return attachMember(runtimeRoot, { id: "soloprogressionbalance", bundle,
