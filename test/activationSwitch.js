@@ -16,7 +16,10 @@ try {
     defaults.miningHoldScale, defaults.logisticsCargoScale,
   ], [3, 3, 3, 2]);
   assert.equal(manifest.activation.strategy, "loader_rename");
-  assert.equal(manifest.settings.fields.some(field => field.id === "enabled"), false);
+  assert.deepEqual(
+    Object.fromEntries(manifest.settings.fields.map(field => [field.id, field.default])),
+    config.DEFAULTS,
+  );
 
   fs.writeFileSync(path.join(root, "settings.json"), JSON.stringify({
     enabled: false, miningHoldScale: 4,
@@ -36,4 +39,4 @@ try {
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }
-console.log("PASS Launcher-only activation, legacy settings, defaults and overrides");
+console.log("PASS configuration defaults, legacy flags, override precedence and Launcher fields");

@@ -1,6 +1,6 @@
-# SoloProgressionBalance 0.4.6 (development changes)
+# SoloProgressionBalance 0.4.7
 
-> The single-switch activation change in `main` is **not** yet included in the published v0.4.6 install ZIP. A new release is required for Launcher users.
+Enabling the mod in Launcher now activates Solo scaling on the next Game server start. Configure retains the four multipliers and optional logging.
 
 EveJS 261108.1 support updates the optional login payload and keeps the native numeric Placebo signature. Scaling continues to apply to effective native values.
 
@@ -14,9 +14,9 @@ The maintainer confirmed the four updated mods work together in-game on EveJS 26
 
 ## Install and update
 
-Download `EveJS-SoloProgressionBalance-0.4.6.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP** and enable the mod. Use **Configure** only to adjust the four multipliers and logging; there is no second enable switch. Release ZIPs contain `loader.js.disabled` and start disabled. Configuration changes require a Game server restart; transient client features require a fresh client connection.
+Download `EveJS-SoloProgressionBalance-0.4.7.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP** and enable the mod, or use **Mods > Check mod updates** for an existing installation. Fresh ZIP installs start disabled. Restart Game and reconnect after enabling, disabling or changing settings.
 
-The package contains no personal `settings.json`, `.env`, runtime database or client archive. Launcher carries forward package-local files declared by the settings schema. Back up personal configuration before updating or removing a mod. For legacy customized source installations, transfer settings to the documented JSON configuration before updating; source files are replaced by updates.
+Launcher updates preserve `settings.json`. If you use a legacy `.env`, back it up before updating and copy any overrides you still rely on into Launcher **Configure** or `settings.json`. The v0.4.6 update contract only carries forward `settings.json`. The row order in the defaults table matches the four multiplier variables in `.env.example`.
 
 ## Behavior and defaults
 
@@ -30,7 +30,7 @@ Scales fresh effective native mining-module yield, mining-drone yield, specializ
 | Logistics/support cargo | 2x |
 | Verbose logging | false |
 
-Scaling activates as soon as the mod's loader is enabled in Launcher (after the Game server restart). Old `enabled` entries in `settings.json`, `.env` or `EVEJS_SOLO_PROGRESSION_BALANCE` are ignored, so an old `false` cannot silently disable the mod. The files are not rewritten. `1` keeps native scaling for a category. Values must be finite and positive. Precedence: nonempty process environment, `mods/soloProgressionBalance/settings.json`, legacy `.env`, built-in defaults. `settings.example.json` and `.env.example` contain defaults, not user settings.
+Legacy activation flags are ignored. This includes `enabled` in `settings.json` and `EVEJS_SOLO_PROGRESSION_BALANCE` in `.env` or the process environment. A multiplier of `1` keeps the native value for that category. Values must be finite and positive. Nonempty process environment variables take precedence over `settings.json`, followed by legacy `.env` and built-in defaults. The two example files list the public defaults.
 
 ## Embedded fitting simulation
 
