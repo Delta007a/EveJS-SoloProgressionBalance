@@ -26,6 +26,7 @@ try:
             self.bundle_revision = 4
             self.active = True
             self.controller = None
+            self.restore_docked_holds = None
             self.registered = []
             self.sm = None
             self.session = None
@@ -39,6 +40,10 @@ try:
             return self.current() and self.character is not None and self.character == getattr(self.session, 'charid', None)
 
         def dispose_controller(self):
+            restore = self.restore_docked_holds
+            self.restore_docked_holds = None
+            if restore is not None:
+                restore()
             controller = self.controller
             self.controller = None
             if controller is not None:
@@ -115,11 +120,32 @@ try:
                 if code is None or _fsc_hashlib.sha256(code.co_code).hexdigest() != self.checks[key]['bytecodeSha256']:
                     raise RuntimeError('Unsupported fitting seam: ' + key)
 
+        def install_docked_holds(self, generation):
+            if self.policy['evejs'] != '261115.2' or 'soloprogressionbalance' not in (self.namespace['validate_policy'](self.policy) or {}):
+                return
+            try:
+                from eve.client.script.environment.invCache import invCacheContainer, Row
+                from eve.common.lib import appConst
+                self.verify({'invCacheContainer.__init__': invCacheContainer.__init__.im_func,
+                             'invCacheContainer.GetCapacity': invCacheContainer.GetCapacity.im_func})
+                # Cargo, fleet hangar and the supported mining/logistics holds.
+                flags = frozenset((appConst.flagCargo, appConst.flagFleetHangar,
+                                   134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
+                                   148, 149, 151, 154, 174, 176, 177, 179, 181, 182, 185, 188))
+                if not self.usable() or generation != self.generation:
+                    return
+                self.restore_docked_holds = self.namespace['install_docked_hold_capacity'](
+                    invCacheContainer, Row, self.session, self.usable, flags)
+            except Exception:
+                print('SOLO_DOCKED_HOLDS:UNAVAILABLE')
+
         def connect(self, generation):
             for attempt in range(6):
                 _fsc_blue.pyos.synchro.SleepWallclock(1000)
                 if not self.usable() or generation != self.generation:
                     return
+                if attempt == 0:
+                    self.install_docked_holds(generation)
                 controller = None
                 try:
                     from eve.client.script.ui.shared.fittingScreen.fittingDogmaLocation import FittingDogmaLocation

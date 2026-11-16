@@ -1,4 +1,14 @@
 {
+  "invCacheContainer.__init__": {
+    "line": 992,
+    "bytecodeSha256": "1f899229c28e24b38b7fdce03ee5fb86dd76fc41d8a7534ffd20a85118e1c9c3",
+    "arguments": ["self", "moniker", "key", "broker"]
+  },
+  "invCacheContainer.GetCapacity": {
+    "line": 1310,
+    "bytecodeSha256": "7deda35a8bbeb41fb50cd93d7f39cecfc636c02747712181b5603c89c5bba224",
+    "arguments": ["self", "flag"]
+  },
   "fittingDogmaLocation.__init__": {
     "line": 60,
     "bytecodeSha256": "6b4430e4815a1e8e7c02e4ca931ae0874ef987978ac17ddf281aaade5bb4cb2c",
