@@ -1,4 +1,6 @@
-# SoloProgressionBalance 0.4.9
+# SoloProgressionBalance 0.4.10
+
+Adds EveJS 261125.3 and Fitting simulation on EVE client build 3724492. The updated client checks cover the specialized-hold display and the effective capacity of assembled ships docked at the pilot's current location.
 
 On EveJS 261115.2, supported holds of the pilot's other assembled ships in the current station or structure show the server's effective capacity. This includes skill bonuses and the configured multipliers.
 
@@ -10,13 +12,13 @@ Optional fitting simulation adds its payload to the existing login packet on sup
 
 Offline login composition checks passed. The maintainer also checked the updated build in-game on EveJS 261028.1.
 
-Supports native EveJS `0.12.9`, `261018.1`, `261028.1`, `261108.1`, `261115.2`. The 261028.1 port was checked with **EveJS Launcher 1.0.76** and EVE client **build 3396210**. The user confirmed all four mods passed in-game verification on 2026-10-31; the automated port checks remain separate evidence. Older declared server support is retained, without claiming a new full certification of those versions.
+Supports native EveJS `0.12.9`, `261018.1`, `261028.1`, `261108.1`, `261115.2`, `261125.3`. The 261028.1 port was checked with **EveJS Launcher 1.0.76** and EVE client **build 3396210**. The user confirmed all four mods passed in-game verification on 2026-10-31; the automated port checks remain separate evidence. Older declared server support is retained, without claiming a new full certification of those versions.
 
 The maintainer confirmed the four updated mods work together in-game on EveJS 261108.1.
 
 ## Install and update
 
-Download `EveJS-SoloProgressionBalance-0.4.9.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP** and enable the mod, or use **Mods > Check mod updates** for an existing installation. Fresh ZIP installs start disabled. Restart Game and reconnect after enabling, disabling or changing settings.
+Download `EveJS-SoloProgressionBalance-0.4.10.zip` from [Releases](https://github.com/Delta007a/EveJS-SoloProgressionBalance/releases/latest). Open Launcher **Mods > Add ZIP** and enable the mod, or use **Mods > Check mod updates** for an existing installation. Fresh ZIP installs start disabled. Restart Game and reconnect after enabling, disabling or changing settings.
 
 Launcher updates preserve `settings.json`. If you use a legacy `.env`, back it up before updating and copy any overrides you still rely on into Launcher **Configure** or `settings.json`. The v0.4.6 update contract only carries forward `settings.json`. The row order in the defaults table matches the four multiplier variables in `.env.example`.
 
@@ -36,9 +38,9 @@ Legacy activation flags are ignored. This includes `enabled` in `settings.json` 
 
 ## Embedded fitting simulation
 
-Projects relevant holds/cargo and mining-module/drone tooltips, including specialized-hold presentation. Works alone or with DroneClassBalance 0.2.7. The shared private runtime selects Solo's bundle revision 7 when Solo is available. ABI 1 and wire schema 1 remain compatible with revision 6.
+Projects relevant holds/cargo and mining-module/drone tooltips, including specialized-hold presentation. Works alone or with DroneClassBalance 0.2.8. Both packages carry bundle revision 8. ABI 1 and wire schema 1 remain compatible with the earlier bundles on the previously supported server and client pairs.
 
-Exact source/version guards support simulation on 0.12.9, 261018.1, 261028.1, 261108.1 and 261115.2 with client build 3396210 and reviewed method fingerprints. Unsupported, absent, malformed or conflicting delivery retains native simulation. Gameplay remains server-authoritative. Injection is transient and never writes vendor client files.
+Exact source/version guards support simulation on 0.12.9, 261018.1, 261028.1, 261108.1 and 261115.2 with client build 3396210. EveJS 261125.3 uses client build 3724492. All supported pairs require reviewed method fingerprints. Unsupported, absent, malformed or conflicting delivery retains native simulation. Gameplay remains server-authoritative. Injection is transient and never writes vendor client files.
 
 ## Removal
 

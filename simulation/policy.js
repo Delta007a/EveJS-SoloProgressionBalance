@@ -1,5 +1,6 @@
 "use strict";
 const crypto = require("node:crypto");
+const { getClientBuild } = require("./delivery");
 const { ATTRIBUTE_MINING_AMOUNT, MINING_HOLD_ATTRIBUTE_IDS } = require("../lib/miningBalance");
 const { ATTRIBUTE_CARGO_CAPACITY, FLEET_HANGAR_ATTRIBUTE_ID } = require("../lib/logisticsBalance");
 const { DRONE_CATEGORY_ID } = require("../lib/clientSync");
@@ -32,6 +33,8 @@ function capacityProgram(api, metadata) {
 
 function buildSoloPolicy(state, api, catalog, isMiningModuleItem, evejsVersion = "0.12.9") {
   if (!state?.active || !api) return null;
+  const clientBuild = getClientBuild(evejsVersion);
+  if (clientBuild === null) return null;
   const programs = [], ships = {}, indexes = new Map(), modules = [], drones = [];
   for (const metadata of [...catalog].sort((a, b) => a.typeID - b.typeID)) {
     const typeID = Number(metadata.typeID), category = Number(metadata.categoryID);
@@ -52,7 +55,7 @@ function buildSoloPolicy(state, api, catalog, isMiningModuleItem, evejsVersion =
   const provider = { schema: 1, capacityPrograms: programs, ships, miningAttribute: ATTRIBUTE_MINING_AMOUNT,
     moduleTypes: moduleScale === 1 ? [] : modules, moduleScale,
     droneTypes: droneScale === 1 ? [] : drones, droneScale };
-  const policy = { schema: 1, evejs: evejsVersion, clientBuild: 3396210,
+  const policy = { schema: 1, evejs: evejsVersion, clientBuild,
     providers: { soloprogressionbalance: provider } };
   policy.revision = crypto.createHash("sha256").update(JSON.stringify(policy)).digest("hex");
   return policy;

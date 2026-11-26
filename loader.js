@@ -5,7 +5,7 @@ const Module = require("node:module");
 const path = require("node:path");
 const { isMainThread } = require("node:worker_threads");
 
-const MOD_VERSION = "0.4.9";
+const MOD_VERSION = "0.4.10";
 const MOD_DIR = __dirname;
 const RUNTIME_ROOT = path.resolve(MOD_DIR, "../..");
 const LOG_PREFIX = "[soloProgressionBalance]";

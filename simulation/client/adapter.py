@@ -89,7 +89,12 @@ def _validate_solo(provider):
 
 
 def validate_policy(policy):
-    if not isinstance(policy, dict) or policy.get('schema') != 1 or policy.get('evejs') not in ('0.12.9', '261018.1', '261028.1', '261108.1', '261115.2') or policy.get('clientBuild') != 3396210:
+    if not isinstance(policy, dict) or policy.get('schema') != 1:
+        return None
+    version = policy.get('evejs')
+    if version not in ('0.12.9', '261018.1', '261028.1', '261108.1', '261115.2', '261125.3'):
+        return None
+    if policy.get('clientBuild') != (3724492 if version == '261125.3' else 3396210):
         return None
     revision, providers = policy.get('revision'), policy.get('providers')
     if not isinstance(revision, STRING_TYPES) or len(revision) != 64 or any(c not in '0123456789abcdef' for c in revision):

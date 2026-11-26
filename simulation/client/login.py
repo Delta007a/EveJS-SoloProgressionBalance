@@ -23,7 +23,7 @@ try:
 
         def __init__(self):
             self.abi = 1
-            self.bundle_revision = 4
+            self.bundle_revision = 8
             self.active = True
             self.controller = None
             self.restore_docked_holds = None
@@ -85,11 +85,13 @@ try:
         def start(self):
             try:
                 _fsc_boot = _fsc_context.get('boot', getattr(_fsc_builtins, 'boot', None))
-                if int(getattr(_fsc_boot, 'build', 0)) != 3396210:
+                build = int(getattr(_fsc_boot, 'build', 0))
+                self.policy = _fsc_json.loads(_fsc_base64.b64decode(_fsc_policy64))
+                if not isinstance(self.policy, dict) or build != self.policy.get('clientBuild'):
                     self.dispose()
                     return
-                self.policy = _fsc_json.loads(_fsc_base64.b64decode(_fsc_policy64))
                 self.checks = _fsc_json.loads(_fsc_base64.b64decode(_fsc_checks64))
+                self.checks.update(self.checks.pop('buildOverrides', {}).get(str(build), {}))
                 self.namespace = {'__builtins__': _fsc_builtins, '__name__': 'evejs_fitting_simulation'}
                 eval(compile(_fsc_zlib.decompress(_fsc_base64.b64decode(_fsc_source64)), '<fitting-simulation-adapter>', 'exec'), self.namespace)
                 if self.namespace['validate_policy'](self.policy) is None:
@@ -121,7 +123,7 @@ try:
                     raise RuntimeError('Unsupported fitting seam: ' + key)
 
         def install_docked_holds(self, generation):
-            if self.policy['evejs'] != '261115.2' or 'soloprogressionbalance' not in (self.namespace['validate_policy'](self.policy) or {}):
+            if self.policy['evejs'] not in ('261115.2', '261125.3') or 'soloprogressionbalance' not in (self.namespace['validate_policy'](self.policy) or {}):
                 return
             try:
                 from eve.client.script.environment.invCache import invCacheContainer, Row
